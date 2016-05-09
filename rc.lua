@@ -130,7 +130,7 @@ mytasklist = {}
 mytasklist.buttons = awful.util.table.join(
                      awful.button({ }, 1, function (c)
                                               if c == client.focus then
-                                                  c.minimized = true
+                                                  -- c.minimized = true
                                               else
                                                   -- Without this, the following
                                                   -- :isvisible() makes no sense
@@ -312,12 +312,6 @@ clientkeys = awful.util.table.join(
     awful.key({ modkey, "Control" }, "Return", function (c) c:swap(awful.client.getmaster()) end),
     awful.key({ modkey,           }, "o",      awful.client.movetoscreen                        ),
     awful.key({ modkey,           }, "t",      function (c) c.ontop = not c.ontop            end),
-    -- awful.key({ modkey,           }, "n",
-    --     function (c)
-    --         -- The client currently has the input focus, so it cannot be
-    --         -- minimized, since minimized clients can't have the focus.
-    --         c.minimized = true
-    --     end),
     awful.key({ modkey,           }, "m",
         function (c)
             c.maximized_horizontal = not c.maximized_horizontal
@@ -495,19 +489,14 @@ end
 local xresources_name = "awesome.started"
 local xresources = awful.util.pread("xrdb -query")
 if not xresources:match(xresources_name) then
-  spawn_with_shell_delayed("compton -b")
   spawn_with_shell_delayed("xset m 2/1 1")
+  spawn_with_shell_delayed("xmodmap ~/.Xmodmap")
 
-  spawn_with_shell_delayed("kwalletd5", 5)
   spawn_with_shell_delayed("pasystray", 5)
   spawn_with_shell_delayed("qxkb", 5)
-  spawn_with_shell_delayed("nm-applet", 5)
-  spawn_with_shell_delayed("xfce4-power-manager", 5)
-  spawn_with_shell_delayed("lxqt-policykit-agent", 5)
   spawn_with_shell_delayed("udisksvm", 5)
   spawn_with_shell_delayed("kshutdown --init", 5)
 
-  spawn_with_shell_delayed("dropbox", 10)
   spawn_with_shell_delayed("emacs", 10)
   spawn_with_shell_delayed("~/bin/ssh-agent-start.sh", 15)
 end
