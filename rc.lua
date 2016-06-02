@@ -447,15 +447,13 @@ local xresources_name = "awesome.started"
 local xresources = awful.util.pread("xrdb -query")
 if not xresources:match(xresources_name) then
   spawn_with_shell_delayed("xset m 2/1 1")
-  spawn_with_shell_delayed("xmodmap ~/.Xmodmap")
 
-  spawn_with_shell_delayed("pasystray", 5)
-  spawn_with_shell_delayed("qxkb", 5)
   spawn_with_shell_delayed("udisksvm", 5)
   spawn_with_shell_delayed("kshutdown --init", 5)
+  spawn_with_shell_delayed("xmodmap ~/.Xmodmap", 5)
+  spawn_with_shell_delayed("~/bin/ssh-agent-start.sh", 5)
 
+  spawn_with_shell_delayed("mpd", 10)
   spawn_with_shell_delayed("emacs", 10)
-  spawn_with_shell_delayed("~/bin/ssh-agent-start.sh", 15)
 end
 awful.util.spawn_with_shell("xrdb -merge <<< " .. "'" .. xresources_name .. ": true'")
-
