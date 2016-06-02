@@ -46,6 +46,14 @@ end
 -- beautiful.init("/usr/share/awesome/themes/default/theme.lua")
 beautiful.init( awful.util.getdir("config") .. "/themes/awesome-solarized/dark/theme.lua" )
 
+-- Alternative wallpaper. Graceful check for the file existence.
+my_wallpaper = os.getenv("HOME") .. "/Pictures/time-spiral-wp.jpg"
+my_wallpaper_file = io.open(my_wallpaper)
+if my_wallpaper_file then
+  my_wallpaper_file:close()
+  beautiful.wallpaper = my_wallpaper
+end
+
 -- This is used later as the default terminal and editor to run.
 terminal = "urxvt"
 editor = "vim"
@@ -79,7 +87,7 @@ local layouts =
 -- {{{ Wallpaper
 if beautiful.wallpaper then
     for s = 1, screen.count() do
-        gears.wallpaper.maximized(beautiful.wallpaper, s, true)
+      gears.wallpaper.fit(beautiful.wallpaper, s, "white")
     end
 end
 -- }}}
