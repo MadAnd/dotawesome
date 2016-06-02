@@ -80,11 +80,38 @@ end
 -- }}}
 
 -- {{{ Tags
+
+local function handle_borders()
+  local clients = awful.client.visible(s)
+  local layout  = awful.layout.getname(awful.layout.get(s))
+
+  if #clients > 0 then -- Fine grained borders and floaters control
+    for _, c in pairs(clients) do -- Floaters always have borders
+      if awful.client.floating.get(c) or layout == "floating" then
+        c.border_width = beautiful.border_width
+
+        -- No borders with only one visible client
+      elseif c.maximized or #clients == 1 or layout == "max" or layout == "fullscreen" then
+        c.border_width = 0
+        -- awful.client.moveresize(0, 0, 2, 2, c)
+      else
+        c.border_width = beautiful.border_width
+      end
+    end
+  end
+end
+
 -- Define a tag table which hold all screen tags.
 tags = {}
 for s = 1, screen.count() do
     -- Each screen has its own tag table.
     tags[s] = awful.tag({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }, s, layouts[1])
+
+    -- Set non-default layouts for some tags
+    awful.layout.set(awful.layout.suit.max, tags[s][1])
+    awful.layout.set(awful.layout.suit.max.fullscreen, tags[s][2])
+
+    screen[s]:connect_signal("arrange", handle_borders)
 end
 -- }}}
 
@@ -384,7 +411,7 @@ root.keys(globalkeys)
 awful.rules.rules = {
     -- All clients will match this rule.
     { rule = { },
-      properties = { border_width = 1,
+      properties = { border_width = beautiful.border_width,
                      border_color = beautiful.border_normal,
                      focus = awful.client.focus.filter,
                      raise = true,
