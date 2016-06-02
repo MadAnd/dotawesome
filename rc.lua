@@ -111,7 +111,9 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 
 -- {{{ Wibox
 -- Create a textclock widget
-mytextclock = awful.widget.textclock()
+os.setlocale("uk_UA.UTF-8", "time")
+-- mytextclock = awful.widget.textclock(" %a %b %d, %H:%M ")
+mytextclock = awful.widget.textclock(" %a %d %b, %H:%M ")
 
 -- Create a wibox for each screen and add it
 mywibox = {}
