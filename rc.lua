@@ -11,6 +11,11 @@ local beautiful = require("beautiful")
 local naughty = require("naughty")
 local menubar = require("menubar")
 
+-- Private libs. Non-local to be accessible via awesome-client!
+multimedia = require("multimedia")
+kbdlayout = require("kbdlayout")
+
+
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
 -- another config (This code will only ever execute for the fallback config)
@@ -142,6 +147,14 @@ os.setlocale("uk_UA.UTF-8", "time")
 -- mytextclock = awful.widget.textclock(" %a %b %d, %H:%M ")
 mytextclock = awful.widget.textclock(" %a %d %b, %H:%M ")
 
+-- Setup kbdlayout module
+kbdlayout.layouts = {
+  { layout="us", variant="dvp" , icon="us.png" },
+  { layout="ua,us", variant=",dvp", icon="ua.png" }
+}
+kbdlayout.default_post_cmd = "xmodmap ~/.Xmodmap"
+kbdlayout.switch(kbdlayout.default_layout)
+
 -- Create a wibox for each screen and add it
 mywibox = {}
 mypromptbox = {}
@@ -221,6 +234,7 @@ for s = 1, 1 do
     -- Widgets that are aligned to the right
     local right_layout = wibox.layout.fixed.horizontal()
     if s == 1 then right_layout:add(wibox.widget.systray()) end
+    right_layout:add(kbdlayout.widget())
     right_layout:add(mytextclock)
     right_layout:add(mylayoutbox[s])
 
@@ -243,26 +257,13 @@ root.buttons(awful.util.table.join(
 -- }}}
 
 
-local function trim(s)
-  return (s:gsub("^%s*(.-)%s*$", "%1"))
-end
-local current_volume_notification_id = 0
-local function volume_change(step)
-  local shell_cmd = "pactl set-sink-volume 0 " .. step .. " && " ..
-    "echo $(pactl list sinks | grep 'Volume: front-left:' | awk '{print $5}')"
-
-  current_volume_notification_id = naughty.notify({
-      text = trim(awful.util.pread(shell_cmd)),
-      font = '20',
-      icon = "/usr/share/pixmaps/pasystray.png",
-      icon_size = 40,
-      timeout = 2,
-      replaces_id = current_volume_notification_id
-  }).id
-end
-
 -- {{{ Key bindings
 globalkeys = awful.util.table.join(
+    -- Switch keyboard layout
+    awful.key({ modkey }, "#46", function () kbdlayout.switch() end),
+    awful.key({ "Shift" }, "Alt_L", function () kbdlayout.switch() end),
+    awful.key({ "Shift" }, "Control_L", function () kbdlayout.switch() end),
+
     awful.key({ modkey,           }, "Left",   awful.tag.viewprev       ),
     awful.key({ modkey,           }, "Right",  awful.tag.viewnext       ),
     awful.key({ modkey,           }, "Escape", awful.tag.history.restore),
@@ -323,11 +324,15 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey }, "p", function() menubar.show() end),
 
     -- Volume control
-    awful.key({ }, "XF86AudioRaiseVolume", function() volume_change("+10%") end),
-    awful.key({ }, "XF86AudioLowerVolume", function() volume_change("-10%") end),
-    awful.key({ }, "XF86AudioMute", function()
-        awful.util.spawn_with_shell("pactl set-sink-mute 0 toggle")
-    end),
+    awful.key({}, "XF86AudioRaiseVolume", function() multimedia.volume_change(5) end),
+    awful.key({}, "XF86AudioLowerVolume", function() multimedia.volume_change(-5) end),
+    awful.key({}, "XF86AudioMute", multimedia.volume_mute),
+
+    -- Playback control
+    awful.key({}, "XF86AudioPlay", multimedia.playback_toggle),
+    awful.key({}, "XF86AudioStop", multimedia.playback_stop),
+    awful.key({}, "XF86AudioNext", multimedia.playback_next),
+    awful.key({}, "XF86AudioPrev", multimedia.playback_prev),
 
     -- Switch between screens
     awful.key({modkey}, "F1",     function () awful.screen.focus(1) end),
