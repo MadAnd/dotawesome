@@ -399,13 +399,11 @@ awful.rules.rules = {
       properties = { floating = true } },
     { rule = { instance = "plugin-container" },
       properties = { floating = true } },
-    { rule_any = { class = { "Firefox", "Pale moon" } },
+    { rule_any = { class = { "Firefox", "Pale moon", "chromium", "Tor Browser" } },
       properties = { tag = tags[1][1],
-                     maximized = true } },
+                     } },
     -- { rule = { instance = "Devtools" },
     --   properties = { tag = tags[2][1] } },
-    -- { rule = { class = "URxvt" },
-    --   properties = { size_hints_honor = false } }
 }
 -- }}}
 
