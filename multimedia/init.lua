@@ -6,7 +6,6 @@
 
 local awful = require("awful")
 local naughty = require("naughty")
-async = require("multimedia.async")
 
 local multimedia = {}
 local current_notification_id = 0
@@ -103,13 +102,6 @@ end
 --- Playback control functions.
 -- @section
 
-local function clean_mpc_status(s)
-  s = trim(s)
-  s = s:gsub("%[playing%]%s*", "")
-  s = s:gsub("%[paused%]%s*", "")
-  return s
-end
-
 function multimedia.playback_toggle()
   awful.util.spawn_with_shell("mpc toggle")
 end
@@ -125,41 +117,5 @@ end
 function multimedia.playback_prev()
   awful.util.spawn_with_shell("mpc prev")
 end
-
--- Monitor MPD state changes
-local poll_cmd = "mpc idle player &>/dev/null; echo $? "
-
-local function mpd_status_changed(cmd_return)
-  local icon
-  local output = awful.util.pread("mpc status")
-
-  if output:match("%[paused%]") then
-    icon = multimedia.icons.playback_paused
-  elseif output:match("%[playing%]") then
-    icon = multimedia.icons.playback_start
-  else
-    icon = multimedia.icons.playback_stop
-    output = ""
-  end
-
-  local pre_cmd = ""
-  if trim(cmd_return) == "0" then
-    current_notification_id = naughty.notify({
-        text = clean_mpc_status(output),
-        font = multimedia.playback_font,
-        icon = multimedia.icon_dir .. icon,
-        icon_size = multimedia.icon_size,
-        timeout = 5,
-        replaces_id = current_notification_id
-    }).id
-  else
-    -- Wait some time if the previous run returned error code.
-    pre_cmd = "sleep 5; "
-  end
-
-  async.execute(pre_cmd .. poll_cmd, mpd_status_changed)
-end
-
-async.execute(poll_cmd, mpd_status_changed)
 
 return multimedia
