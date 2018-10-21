@@ -1,4 +1,5 @@
 -- Standard awesome library
+local common = require("awful.widget.common")
 local gears = require("gears")
 local gfs = require("gears.filesystem")
 local gtable = require("gears.table")
@@ -183,6 +184,83 @@ end
 -- Re-set wallpaper when a screen's geometry changes (e.g. different resolution)
 screen.connect_signal("property::geometry", set_wallpaper)
 
+--- Update fn for tasklist widget.
+-- @param w The widget.
+-- @tab buttons
+-- @func label Function to generate label parameters from an object.
+--   The function gets passed an object from `objects`, and
+--   has to return `text`, `bg`, `bg_image`, `icon`.
+-- @tab data Current data/cache, indexed by objects.
+-- @tab objects Objects to be displayed / updated.
+local function tasklist_update(w, buttons, label, data, objects)
+    -- update the widgets, creating them if needed
+    w:reset()
+    for i, o in ipairs(objects) do
+        local cache = data[o]
+        local ib, tb, bgb, tbm, ibm, l
+        if cache then
+            ib = cache.ib
+            tb = cache.tb
+            bgb = cache.bgb
+            tbm = cache.tbm
+            ibm = cache.ibm
+        else
+            ib = wibox.widget.imagebox()
+            tb = wibox.widget.textbox()
+            tb:set_font("Droid Sans 15")
+            bgb = wibox.container.background()
+            tbm = wibox.container.margin(tb, dpi(2), dpi(2))
+            ibm = wibox.container.margin(ib, dpi(2), dpi(2), dpi(2), dpi(2))
+            l = wibox.layout.fixed.horizontal()
+
+            -- All of this is added in a fixed widget
+            l:fill_space(true)
+            l:add(ibm)
+            l:add(tbm)
+
+            -- And all of this gets a background
+            bgb:set_widget(l)
+
+            bgb:buttons(common.create_buttons(buttons, o))
+
+            data[o] = {
+                ib  = ib,
+                tb  = tb,
+                bgb = bgb,
+                tbm = tbm,
+                ibm = ibm,
+            }
+        end
+
+        local text, bg, bg_image, icon, args = label(o, tb)
+        args = args or {}
+
+        -- The text might be invalid, so use pcall.
+        if text == nil or text == "" then
+            tbm:set_margins(0)
+        else
+            if not tb:set_markup_silently(text) then
+                tb:set_markup("<i>&lt;Invalid text&gt;</i>")
+            end
+        end
+        bgb:set_bg(bg)
+        if type(bg_image) == "function" then
+            -- TODO: Why does this pass nil as an argument?
+            bg_image = bg_image(tb,o,nil,objects,i)
+        end
+        bgb:set_bgimage(bg_image)
+        if icon then
+            ib:set_image(icon)
+        else
+            ibm:set_margins(0)
+        end
+
+        bgb:set_shape(gears.shape.rounded_rect, 4)
+
+        w:add(bgb)
+   end
+end
+
 awful.screen.connect_for_each_screen(function(s)
     -- Wallpaper
     set_wallpaper(s)
@@ -198,39 +276,61 @@ awful.screen.connect_for_each_screen(function(s)
     awful.tag.add("8", { screen = s, layout = awful.layout.suit.max.fullscreen })
     awful.tag.add("9", { screen = s, layout = default_layout })
 
-    -- Create a promptbox for each screen
-    s.mypromptbox = awful.widget.prompt()
+    -- Create a taglist widget
+    local mytagslayout = wibox.layout.grid("vertical")
+    mytagslayout:set_forced_num_cols(2)
+    local mytagfilter = awful.widget.taglist.filter.all
+    s.mytaglist = awful.widget.taglist(s, mytagfilter, taglist_buttons, nil, nil, mytagslayout)
+
+    -- Create a tasklist widget
+    local mytasklistlayout = wibox.layout.fixed.vertical()
+    local mytaskfilter = awful.widget.tasklist.filter.currenttags
+    s.mytasklist = awful.widget.tasklist(s, mytaskfilter, tasklist_buttons, nil, tasklist_update, mytasklistlayout)
+
+    -- Create systray widget
+    s.mysystray = wibox.widget {
+      {
+        widget = wibox.widget.systray,
+        horizontal = false
+      },
+      layout = wibox.container.margin,
+      left = dpi(4, s),
+      right = dpi(4, s),
+    }
+
     -- Create an imagebox widget which will contains an icon indicating which layout we're using.
     -- We need one layoutbox per screen.
-    s.mylayoutbox = awful.widget.layoutbox(s)
-    s.mylayoutbox:buttons(gtable.join(
+    local wlayoutbox = awful.widget.layoutbox(s)
+    wlayoutbox:buttons(gtable.join(
                             awful.button({ }, 1, function () awful.layout.inc( 1) end),
                             awful.button({ }, 3, function () awful.layout.inc(-1) end),
                             awful.button({ }, 4, function () awful.layout.inc( 1) end),
                             awful.button({ }, 5, function () awful.layout.inc(-1) end)))
-    -- Create a taglist widget
-    s.mytaglist = awful.widget.taglist(s, awful.widget.taglist.filter.noempty, taglist_buttons)
-
-    -- Create a tasklist widget
-    s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons)
+    s.mylayoutbox = wibox.widget {
+      wlayoutbox,
+      layout = wibox.container.margin,
+      left = dpi(4, s),
+      right = dpi(4, s),
+    }
 
     -- Create the wibox
-    s.mywibox = awful.wibar({ position = "top", screen = s })
+    -- s.mywibox = awful.wibar({ position = "top", height = 22, screen = s })
+    s.mywibox = awful.wibar {
+        position = "left",
+        width = 30,
+        screen = s,
+    }
 
     -- Add widgets to the wibox
     s.mywibox:setup {
-      layout = wibox.layout.align.horizontal,
-      { -- Left widgets
-        layout = wibox.layout.fixed.horizontal,
-        s.mytaglist,
-        s.mypromptbox,
-      },
+      layout = wibox.layout.align.vertical,
+      s.mytaglist, -- Left widget
       s.mytasklist, -- Middle widget
       { -- Right widgets
-        layout = wibox.layout.fixed.horizontal,
-        wibox.widget.systray(),
-        volumecfg.widget,
+        layout = wibox.layout.fixed.vertical,
+        s.mysystray,
         kbdlayout(),
+        volumecfg.widget,
         mytextclock,
         s.mylayoutbox,
       },
