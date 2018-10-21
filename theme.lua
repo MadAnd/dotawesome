@@ -48,9 +48,12 @@ theme.bg_systray = theme.bg_normal
 theme.border_width  = 1
 theme.useless_gap  = 0
 theme.border_normal = theme.colors.base1
-theme.border_focus  = theme.colors.cyan
+theme.border_focus  = theme.colors.red
 theme.border_marked = theme.bg_urgent
 -- }}}
+
+-- Systray
+theme.systray_icon_spacing = 0
 
 -- {{{ Titlebars
 theme.titlebar_bg_focus  = theme.bg_focus
