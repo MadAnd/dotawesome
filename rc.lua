@@ -9,6 +9,7 @@ require("awful.autofocus")
 local wibox = require("wibox")
 -- Theme handling library
 local beautiful = require("beautiful")
+beautiful.init(gfs.get_configuration_dir() .. "/theme.lua")
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
@@ -21,6 +22,8 @@ local dpi = require("beautiful").xresources.apply_dpi
 modkey = "Mod4"
 require("rules")
 local globalkeys = require("globalkeys")
+local taglistcfg = require("taglistcfg")
+local tasklistcfg = require("tasklistcfg")
 
 -- Private libs. Non-local to be accessible via awesome-client!
 multimedia = require("multimedia")
@@ -53,8 +56,6 @@ end
 -- }}}
 
 -- {{{ Variable definitions
--- Themes define colours, icons, font and wallpapers.
-beautiful.init(gfs.get_configuration_dir() .. "/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 terminal = "urxvt "
@@ -82,21 +83,6 @@ awful.layout.layouts = {
 local default_layout = awful.layout.layouts[1]
 -- }}}
 
--- {{{ Helper functions
-local function client_menu_toggle_fn()
-  local instance = nil
-
-  return function ()
-    if instance and instance.wibox.visible then
-      instance:hide()
-      instance = nil
-    else
-      instance = awful.menu.clients({ theme = { width = 250 } })
-    end
-  end
-end
--- }}}
-
 -- {{{ Menu
 
 -- Menubar configuration
@@ -106,10 +92,45 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- {{{ Wibar
 -- Create a textclock widget
 os.setlocale("uk_UA.UTF-8", "time")
-local wtextclock = wibox.widget.textclock("%H:%M")
-wtextclock:set_font("Droid Sans 8")
 local mytextclock = wibox.widget {
-  wtextclock,
+  {
+    {
+      widget = wibox.widget.textclock("%H:%M"),
+      font = beautiful.font_small,
+      align = "center",
+    },
+    {
+      widget = wibox.widget.textclock("%a %d"),
+      font = beautiful.font_small,
+      align = "center",
+    },
+    {
+      widget = wibox.widget.textclock("%m.%y"),
+      font = beautiful.font_small,
+      align = "center",
+    },
+    layout = wibox.layout.fixed.vertical
+  },
+  layout = wibox.container.margin,
+  top = 0,
+  bottom = 2,
+}
+
+local function trim(s)
+  return (s:gsub("^%s*(.-)%s*$", "%1"))
+end
+
+local mycputemp_cmd = "bash -c \"sensors | grep temp1 | awk '{ print substr($2, 2, 2) substr($2, 6, 2) }'\""
+local cputemp_callback = function (widget, stdout, stderr, exitreason, exitcode)
+  widget:set_text(trim(stdout))
+end
+local cputemp_textbox = wibox.widget {
+  widget = wibox.widget.textbox,
+  align = "center",
+  font = beautiful.font_small,
+}
+local mycputemp = wibox.widget {
+  awful.widget.watch(mycputemp_cmd, nil, cputemp_callback, cputemp_textbox),
   layout = wibox.container.margin,
   top = 2,
   bottom = 2,
@@ -120,7 +141,7 @@ volumecfg = volume_control {
     mclick  = terminal .. "-e alsamixer",
     rclick  = terminal .. "-e alsamixer",
 }
-volumecfg.widget:set_font("Droid Sans 8")
+volumecfg.widget:set_font(beautiful.font_small)
 
 -- Setup kbdlayout module
 kbdlayout.init {
@@ -134,41 +155,6 @@ kbdlayout.init {
 }
 
 -- Create a wibox for each screen and add it
-local taglist_buttons = gtable.join(
-  awful.button({ }, 1, function(t) t:view_only() end),
-  awful.button({ modkey }, 1, function(t)
-      if client.focus then
-        client.focus:move_to_tag(t)
-      end
-  end),
-  awful.button({ }, 3, awful.tag.viewtoggle),
-  awful.button({ modkey }, 3, function(t)
-      if client.focus then
-        client.focus:toggle_tag(t)
-      end
-  end)
-)
-
-local tasklist_buttons = gtable.join(
-  awful.button({ }, 1, function (c)
-      if c == client.focus then
-        -- c.minimized = true
-      else
-        -- Without this, the following
-        -- :isvisible() makes no sense
-        c.minimized = false
-        if not c:isvisible() and c.first_tag then
-          c.first_tag:view_only()
-        end
-        -- This will also un-minimize
-        -- the client, if needed
-        client.focus = c
-        c:raise()
-      end
-  end),
-  awful.button({ }, 3, client_menu_toggle_fn())
-  )
-
 local function set_wallpaper(s)
   -- Wallpaper
   if beautiful.wallpaper then
@@ -183,83 +169,6 @@ end
 
 -- Re-set wallpaper when a screen's geometry changes (e.g. different resolution)
 screen.connect_signal("property::geometry", set_wallpaper)
-
---- Update fn for tasklist widget.
--- @param w The widget.
--- @tab buttons
--- @func label Function to generate label parameters from an object.
---   The function gets passed an object from `objects`, and
---   has to return `text`, `bg`, `bg_image`, `icon`.
--- @tab data Current data/cache, indexed by objects.
--- @tab objects Objects to be displayed / updated.
-local function tasklist_update(w, buttons, label, data, objects)
-    -- update the widgets, creating them if needed
-    w:reset()
-    for i, o in ipairs(objects) do
-        local cache = data[o]
-        local ib, tb, bgb, tbm, ibm, l
-        if cache then
-            ib = cache.ib
-            tb = cache.tb
-            bgb = cache.bgb
-            tbm = cache.tbm
-            ibm = cache.ibm
-        else
-            ib = wibox.widget.imagebox()
-            tb = wibox.widget.textbox()
-            tb:set_font("Droid Sans 15")
-            bgb = wibox.container.background()
-            tbm = wibox.container.margin(tb, dpi(2), dpi(2))
-            ibm = wibox.container.margin(ib, dpi(2), dpi(2), dpi(2), dpi(2))
-            l = wibox.layout.fixed.horizontal()
-
-            -- All of this is added in a fixed widget
-            l:fill_space(true)
-            l:add(ibm)
-            l:add(tbm)
-
-            -- And all of this gets a background
-            bgb:set_widget(l)
-
-            bgb:buttons(common.create_buttons(buttons, o))
-
-            data[o] = {
-                ib  = ib,
-                tb  = tb,
-                bgb = bgb,
-                tbm = tbm,
-                ibm = ibm,
-            }
-        end
-
-        local text, bg, bg_image, icon, args = label(o, tb)
-        args = args or {}
-
-        -- The text might be invalid, so use pcall.
-        if text == nil or text == "" then
-            tbm:set_margins(0)
-        else
-            if not tb:set_markup_silently(text) then
-                tb:set_markup("<i>&lt;Invalid text&gt;</i>")
-            end
-        end
-        bgb:set_bg(bg)
-        if type(bg_image) == "function" then
-            -- TODO: Why does this pass nil as an argument?
-            bg_image = bg_image(tb,o,nil,objects,i)
-        end
-        bgb:set_bgimage(bg_image)
-        if icon then
-            ib:set_image(icon)
-        else
-            ibm:set_margins(0)
-        end
-
-        bgb:set_shape(gears.shape.rounded_rect, 4)
-
-        w:add(bgb)
-   end
-end
 
 awful.screen.connect_for_each_screen(function(s)
     -- Wallpaper
@@ -280,12 +189,10 @@ awful.screen.connect_for_each_screen(function(s)
     local mytagslayout = wibox.layout.grid("vertical")
     mytagslayout:set_forced_num_cols(2)
     local mytagfilter = awful.widget.taglist.filter.all
-    s.mytaglist = awful.widget.taglist(s, mytagfilter, taglist_buttons, nil, nil, mytagslayout)
+    s.mytaglist = awful.widget.taglist(s, mytagfilter, taglistcfg.buttons, nil, taglistcfg.update_function, mytagslayout)
 
     -- Create a tasklist widget
-    local mytasklistlayout = wibox.layout.fixed.vertical()
-    local mytaskfilter = awful.widget.tasklist.filter.currenttags
-    s.mytasklist = awful.widget.tasklist(s, mytaskfilter, tasklist_buttons, nil, tasklist_update, mytasklistlayout)
+    s.mytasklist = tasklistcfg.widget(s)
 
     -- Create systray widget
     s.mysystray = wibox.widget {
@@ -316,7 +223,7 @@ awful.screen.connect_for_each_screen(function(s)
     -- Create the wibox
     -- s.mywibox = awful.wibar({ position = "top", height = 22, screen = s })
     s.mywibox = awful.wibar {
-        position = "left",
+        position = "right",
         width = 30,
         screen = s,
     }
@@ -324,13 +231,14 @@ awful.screen.connect_for_each_screen(function(s)
     -- Add widgets to the wibox
     s.mywibox:setup {
       layout = wibox.layout.align.vertical,
-      s.mytaglist, -- Left widget
+      s.mytaglist, -- Top widget
       s.mytasklist, -- Middle widget
-      { -- Right widgets
+      { -- Bottom widgets
         layout = wibox.layout.fixed.vertical,
         s.mysystray,
         kbdlayout(),
         volumecfg.widget,
+        mycputemp,
         mytextclock,
         s.mylayoutbox,
       },
