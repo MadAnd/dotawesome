@@ -29,6 +29,7 @@ local tasklistcfg = require("tasklistcfg")
 multimedia = require("multimedia")
 kbdlayout = require("kbdlayout")
 volume_control = require("volume-control")
+cpuload = require("cpuload")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -237,6 +238,7 @@ awful.screen.connect_for_each_screen(function(s)
         layout = wibox.layout.fixed.vertical,
         s.mysystray,
         kbdlayout(),
+        cpuload,
         volumecfg.widget,
         mycputemp,
         mytextclock,
