@@ -47,22 +47,24 @@ function vcontrol.new(args)
     sw.cmd = "amixer"
     sw.device = args.device or nil
     sw.cardid  = args.cardid or nil
-    sw.channel = args.channel or "Master"
+    sw.channel_snd = args.channel_snd or "Master"
+    sw.channel_mic = args.channel_mic or "Capture"
     sw.step = args.step or '5%'
     sw.lclick = args.lclick or "toggle"
     sw.mclick = args.mclick or "pavucontrol"
     sw.rclick = args.rclick or "pavucontrol"
 
-    sw.widget = wibox.widget.textbox()
-    sw.widget.set_align("right")
-
-    sw.widget:buttons(awful.util.table.join(
+    sw.widget = wibox.widget {
+      widget = wibox.widget.textbox,
+      align = "center",
+      buttons = awful.util.table.join(
         awful.button({}, 1, function() sw:action(sw.lclick) end),
         awful.button({}, 2, function() sw:action(sw.mclick) end),
         awful.button({}, 3, function() sw:action(sw.rclick) end),
         awful.button({}, 4, function() sw:up() end),
         awful.button({}, 5, function() sw:down() end)
-    ))
+      )
+    }
 
     sw.timer = timer({ timeout = args.timeout or 0.5 })
     sw.timer:connect_signal("timeout", function() sw:get() end)
@@ -113,23 +115,27 @@ function vcontrol:mixercommand(...)
 end
 
 function vcontrol:get()
-    self:update(self:mixercommand("get", self.channel))
+    self:update(self:mixercommand("get", self.channel_snd))
 end
 
 function vcontrol:up()
-    self:update(self:mixercommand("set", self.channel, self.step .. "+"))
+    self:update(self:mixercommand("set", self.channel_snd, self.step .. "+"))
 end
 
 function vcontrol:down()
-    self:update(self:mixercommand("set", self.channel, self.step .. "-"))
+    self:update(self:mixercommand("set", self.channel_snd, self.step .. "-"))
 end
 
-function vcontrol:toggle()
-    self:update(self:mixercommand("set", self.channel, "toggle"))
+function vcontrol:toggle_snd()
+    self:update(self:mixercommand("set", self.channel_snd, "toggle"))
+end
+
+function vcontrol:toggle_mic()
+  self:update(self:mixercommand("set", self.channel_mic, "toggle"))
 end
 
 function vcontrol:mute()
-    self:update(self:mixercommand("set", "Master", "mute"))
+    self:update(self:mixercommand("set", self.channel_snd, "mute"))
 end
 
 function vcontrol.mt:__call(...)

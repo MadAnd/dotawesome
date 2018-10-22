@@ -354,7 +354,8 @@ root.keys(
     -- Volume control
     awful.key({}, "XF86AudioRaiseVolume", function () volumecfg:up() end),
     awful.key({}, "XF86AudioLowerVolume", function () volumecfg:down() end),
-    awful.key({}, "XF86AudioMute",        function () volumecfg:toggle() end),
+    awful.key({}, "XF86AudioMute",        function () volumecfg:toggle_snd() end),
+    awful.key({}, "XF86AudioMicMute",        function () volumecfg:toggle_mic() end),
     -- Playback control
     awful.key({}, "XF86AudioPlay", multimedia.playback_toggle),
     awful.key({}, "XF86AudioStop", multimedia.playback_stop),
