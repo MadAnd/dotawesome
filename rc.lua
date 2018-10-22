@@ -9,13 +9,12 @@ require("awful.autofocus")
 local wibox = require("wibox")
 -- Theme handling library
 local beautiful = require("beautiful")
-beautiful.init(gfs.get_configuration_dir() .. "/theme.lua")
+local dpi = beautiful.xresources.apply_dpi
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
 -- Standard widgets
 local hotkeys_popup = require("awful.hotkeys_popup").widget
-local dpi = require("beautiful").xresources.apply_dpi
 
 -- Split-out config parts
 -- Default modkey. Define it before requiring external hotkey files!
@@ -62,6 +61,9 @@ end
 terminal = "urxvt "
 editor = os.getenv("EDITOR") or "emacsclient -c"
 editor_cmd = terminal .. " -e " .. editor
+
+-- Load custom theme
+beautiful.init(gfs.get_configuration_dir() .. "/theme.lua")
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 awful.layout.layouts = {
