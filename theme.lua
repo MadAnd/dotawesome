@@ -32,6 +32,7 @@ theme.colors.green   = "#859900ff"
 -- {{{ Styles
 -- theme.font      = "Terminus 9"
 theme.font      = "Droid Sans 10"
+theme.font_small = "Droid Sans 8"
 
 -- {{{ Colors
 theme.fg_normal  = theme.colors.base02
@@ -53,7 +54,7 @@ theme.border_marked = theme.bg_urgent
 -- }}}
 
 -- Systray
-theme.systray_icon_spacing = 0
+theme.systray_icon_spacing = 1
 
 -- {{{ Titlebars
 theme.titlebar_bg_focus  = theme.bg_focus
@@ -73,15 +74,25 @@ theme.menu_height = "15"
 theme.menu_width  = "100"
 -- }}}
 
+-- Wibar
+
 -- {{{ Icons
 -- {{{ Taglist
-theme.taglist_squares_sel   = theme.default_themes_path.."/zenburn/taglist/squarefz.png"
-theme.taglist_squares_unsel = theme.default_themes_path.."/zenburn/taglist/squarez.png"
---theme.taglist_squares_resize = "false"
+theme.taglist_bg_focus = theme.colors.green
+theme.taglist_bg_occupied = theme.colors.blue
+theme.taglist_fg_occupied = theme.colors.base3
+theme.taglist_bg_empty = theme.colors.base2
+
+-- theme.taglist_squares_sel   = theme.default_themes_path.."/default/taglist/squarefz.png"
+-- theme.taglist_squares_unsel = theme.default_themes_path.."/default/taglist/squarez.png"
+-- theme.taglist_squares_resize = false
 -- }}}
 
+-- Tasklist
+theme.tasklist_bg_normal = theme.colors.base2
+
 -- {{{ Misc
-theme.awesome_icon           = theme.default_themes_path.."/zenburn/awesome-icon.png"
+theme.awesome_icon           = theme.default_themes_path.."/default/awesome-icon.png"
 theme.menu_submenu_icon      = theme.default_themes_path.."/default/submenu.png"
 -- }}}
 
@@ -101,28 +112,28 @@ theme.layout_floating   = theme.default_themes_path.."/zenburn/layouts/floating.
 -- }}}
 
 -- {{{ Titlebar
-theme.titlebar_close_button_focus  = theme.default_themes_path.."/zenburn/titlebar/close_focus.png"
-theme.titlebar_close_button_normal = theme.default_themes_path.."/zenburn/titlebar/close_normal.png"
+theme.titlebar_close_button_focus  = theme.default_themes_path.."/default/titlebar/close_focus.png"
+theme.titlebar_close_button_normal = theme.default_themes_path.."/default/titlebar/close_normal.png"
 
-theme.titlebar_ontop_button_focus_active  = theme.default_themes_path.."/zenburn/titlebar/ontop_focus_active.png"
-theme.titlebar_ontop_button_normal_active = theme.default_themes_path.."/zenburn/titlebar/ontop_normal_active.png"
-theme.titlebar_ontop_button_focus_inactive  = theme.default_themes_path.."/zenburn/titlebar/ontop_focus_inactive.png"
-theme.titlebar_ontop_button_normal_inactive = theme.default_themes_path.."/zenburn/titlebar/ontop_normal_inactive.png"
+theme.titlebar_ontop_button_focus_active  = theme.default_themes_path.."/default/titlebar/ontop_focus_active.png"
+theme.titlebar_ontop_button_normal_active = theme.default_themes_path.."/default/titlebar/ontop_normal_active.png"
+theme.titlebar_ontop_button_focus_inactive  = theme.default_themes_path.."/default/titlebar/ontop_focus_inactive.png"
+theme.titlebar_ontop_button_normal_inactive = theme.default_themes_path.."/default/titlebar/ontop_normal_inactive.png"
 
-theme.titlebar_sticky_button_focus_active  = theme.default_themes_path.."/zenburn/titlebar/sticky_focus_active.png"
-theme.titlebar_sticky_button_normal_active = theme.default_themes_path.."/zenburn/titlebar/sticky_normal_active.png"
-theme.titlebar_sticky_button_focus_inactive  = theme.default_themes_path.."/zenburn/titlebar/sticky_focus_inactive.png"
-theme.titlebar_sticky_button_normal_inactive = theme.default_themes_path.."/zenburn/titlebar/sticky_normal_inactive.png"
+theme.titlebar_sticky_button_focus_active  = theme.default_themes_path.."/default/titlebar/sticky_focus_active.png"
+theme.titlebar_sticky_button_normal_active = theme.default_themes_path.."/default/titlebar/sticky_normal_active.png"
+theme.titlebar_sticky_button_focus_inactive  = theme.default_themes_path.."/default/titlebar/sticky_focus_inactive.png"
+theme.titlebar_sticky_button_normal_inactive = theme.default_themes_path.."/default/titlebar/sticky_normal_inactive.png"
 
-theme.titlebar_floating_button_focus_active  = theme.default_themes_path.."/zenburn/titlebar/floating_focus_active.png"
-theme.titlebar_floating_button_normal_active = theme.default_themes_path.."/zenburn/titlebar/floating_normal_active.png"
-theme.titlebar_floating_button_focus_inactive  = theme.default_themes_path.."/zenburn/titlebar/floating_focus_inactive.png"
-theme.titlebar_floating_button_normal_inactive = theme.default_themes_path.."/zenburn/titlebar/floating_normal_inactive.png"
+theme.titlebar_floating_button_focus_active  = theme.default_themes_path.."/default/titlebar/floating_focus_active.png"
+theme.titlebar_floating_button_normal_active = theme.default_themes_path.."/default/titlebar/floating_normal_active.png"
+theme.titlebar_floating_button_focus_inactive  = theme.default_themes_path.."/default/titlebar/floating_focus_inactive.png"
+theme.titlebar_floating_button_normal_inactive = theme.default_themes_path.."/default/titlebar/floating_normal_inactive.png"
 
-theme.titlebar_maximized_button_focus_active  = theme.default_themes_path.."/zenburn/titlebar/maximized_focus_active.png"
-theme.titlebar_maximized_button_normal_active = theme.default_themes_path.."/zenburn/titlebar/maximized_normal_active.png"
-theme.titlebar_maximized_button_focus_inactive  = theme.default_themes_path.."/zenburn/titlebar/maximized_focus_inactive.png"
-theme.titlebar_maximized_button_normal_inactive = theme.default_themes_path.."/zenburn/titlebar/maximized_normal_inactive.png"
+theme.titlebar_maximized_button_focus_active  = theme.default_themes_path.."/default/titlebar/maximized_focus_active.png"
+theme.titlebar_maximized_button_normal_active = theme.default_themes_path.."/default/titlebar/maximized_normal_active.png"
+theme.titlebar_maximized_button_focus_inactive  = theme.default_themes_path.."/default/titlebar/maximized_focus_inactive.png"
+theme.titlebar_maximized_button_normal_inactive = theme.default_themes_path.."/default/titlebar/maximized_normal_inactive.png"
 -- }}}
 -- }}}
 
