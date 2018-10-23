@@ -201,6 +201,8 @@ awful.screen.connect_for_each_screen(function(s)
       layout = wibox.container.margin,
       left = dpi(4, s),
       right = dpi(4, s),
+      top = dpi(2, s),
+      bottom = dpi(2, s),
     }
 
     -- Create an imagebox widget which will contains an icon indicating which layout we're using.
@@ -234,8 +236,8 @@ awful.screen.connect_for_each_screen(function(s)
       { -- Bottom widgets
         layout = wibox.layout.fixed.vertical,
         s.mysystray,
-        kbdlayout(),
         cpuload,
+        kbdlayout(),
         volumecfg.widget,
         mycputemp,
         mytextclock,

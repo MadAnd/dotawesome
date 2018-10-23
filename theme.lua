@@ -90,6 +90,7 @@ theme.taglist_bg_empty = theme.colors.base2
 
 -- Tasklist
 theme.tasklist_bg_normal = theme.colors.base2
+theme.tasklist_spacing = 2
 
 -- {{{ Misc
 theme.awesome_icon           = theme.default_themes_path.."/default/awesome-icon.png"
