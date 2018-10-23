@@ -107,11 +107,6 @@ local mytextclock = wibox.widget {
       font = beautiful.font_small,
       align = "center",
     },
-    {
-      widget = wibox.widget.textclock("%m.%y"),
-      font = beautiful.font_small,
-      align = "center",
-    },
     layout = wibox.layout.fixed.vertical
   },
   layout = wibox.container.margin,
