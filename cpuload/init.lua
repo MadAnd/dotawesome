@@ -46,7 +46,7 @@ end
 local function create_progressbar()
   return wibox.widget {
     max_value = 100,
-    forced_height = 4,
+    forced_height = 2,
     background_color = "#859900ff",
     color = "#dc322fff",
     widget = wibox.widget.progressbar
@@ -57,13 +57,36 @@ local function wrap_progressbar(w)
   return wibox.widget {
     w,
     layout = wibox.container.margin,
+    margins = 1,
+  }
+end
+
+local function wrap_final_widget(w)
+  return wibox.widget {
+    w,
+    layout = wibox.container.margin,
     margins = 2,
   }
 end
 
-local function compute_usage(str, idle_prev, total_prev)
+--- Parse a single CPU-stat line form /proc/stats into 10 numbers.
+-- @return user
+-- @return nice
+-- @return system
+-- @return idle
+-- @return iowait
+-- @return irq
+-- @return softirq
+-- @return steal
+-- @return guest
+-- @return guest_nice
+local function parse_cpustat_line(str)
   local cpuload_pattern = 'cpu%d+%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)'
-  local user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice = str:match(cpuload_pattern)
+  return str:match(cpuload_pattern)
+end
+
+local function compute_usage(str, idle_prev, total_prev)
+  local user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice = parse_cpustat_line(str)
 
   local total = user + nice + system + idle + iowait + irq + softirq + steal
 
@@ -91,13 +114,19 @@ for i = 1, coresnum do
   wrapped_pbars[i] = wrap_progressbar(pbar)
 end
 
-local cpuload_widget = wibox.layout.fixed.vertical()
+-- Arrange all progressbars into vertical layout.
+local l = wibox.layout.fixed.vertical()
 for _, w in pairs(wrapped_pbars) do
-  cpuload_widget:add(w)
+  l:add(w)
 end
--- Wrap them all in one more layout.
 
-watch([[bash -c "cat /proc/stat | egrep '^cpu[0-9]+'"]], 1,
+-- Wrap them all in one more layout.
+local cpuload_widget = wrap_final_widget(l)
+
+local stats_cmd = [[sh -c "cat /proc/stat | egrep '^cpu[0-9]+'"]]
+watch(
+  stats_cmd,
+  1,
   function(widget, stdout, stderr, exitreason, exitcode)
     local i = 1
     for s in stdout:gmatch("[^\r\n]+") do
