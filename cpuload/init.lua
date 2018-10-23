@@ -21,7 +21,7 @@ local bg_core = "#859900"
 --- Foreground color for progressbar showing the single core CPU usage.
 local fg_core = "#dc322f"
 
--- Caches for values form previous iterations.
+-- Caches for values from previous iterations.
 local total_prev = { }
 local idle_prev = { }
 
@@ -53,7 +53,7 @@ local function init_prev_vars(coresnum)
 end
 
 local function create_progressbar(idx)
-  -- Widget with idx=1 shows total CPU usage.
+  -- Widget with idx=1 shows the total CPU usage.
   local bg = idx == 1 and bg_total or bg_core
   local fg = idx == 1 and fg_total or fg_core
   local height = idx == 1 and 4 or 2
@@ -83,8 +83,8 @@ local function wrap_final_widget(w)
   }
 end
 
---- Parse a single CPU-stat line form /proc/stat into 10 numbers.
--- @param str Single line from the /proc/stat.
+--- Parse a CPU-stat line form /proc/stat.
+-- @param str Line from the /proc/stat.
 -- @return user
 -- @return nice
 -- @return system
@@ -100,10 +100,10 @@ local function parse_cpustat_line(str)
   return str:match(cpuload_pattern)
 end
 
---- Compute CPU usage percentage relative to the given previous values.
--- @param str Single line from the /proc/stat.
--- @param idle_prev Previous value of idle.
--- @param total_prev Previous value of total.
+--- Compute the CPU usage percentage, relative to the given previous values.
+-- @param str Line from the /proc/stat.
+-- @param idle_prev Previous idle.
+-- @param total_prev Previous total.
 -- @return usage Usage percentage.
 -- @return total New total.
 -- @return idle New idle.
@@ -123,7 +123,7 @@ end
 -- Widget implementation
 ------------------------------------------
 
--- Initialize the current CPU.
+-- Initialize the vars for current CPU.
 local coresnum = detect_corenum()
 init_prev_vars(coresnum + 1)
 
@@ -146,9 +146,10 @@ end
 local cpuload_widget = wrap_final_widget(l)
 
 local stats_cmd = [[sh -c "cat /proc/stat | egrep '^cpu'"]]
+local update_interval = 1
 watch(
   stats_cmd,
-  1,
+  update_interval,
   function(widget, stdout, stderr, exitreason, exitcode)
     local i = 1
     for s in stdout:gmatch("[^\r\n]+") do

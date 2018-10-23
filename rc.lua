@@ -136,8 +136,9 @@ local mycputemp = wibox.widget {
 
 -- Configure sound volume control module
 volumecfg = volume_control {
-    mclick  = terminal .. "-e alsamixer",
-    rclick  = terminal .. "-e alsamixer",
+  timeout = 2,
+  mclick  = terminal .. "-e alsamixer",
+  rclick  = terminal .. "-e alsamixer",
 }
 volumecfg.widget:set_font(beautiful.font_small)
 
