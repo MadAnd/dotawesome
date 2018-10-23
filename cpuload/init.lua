@@ -12,6 +12,15 @@ local watch = require("awful.widget.watch")
 local wibox = require("wibox")
 local naughty = require("naughty")
 
+--- Background color for progressbar showing the total CPU usage.
+local bg_total = "#6c71c4"
+--- Foreground color for progressbar showing the total CPU usage.
+local fg_total = "#cb4b16"
+--- Background color for progressbar showing the single core CPU usage.
+local bg_core = "#859900"
+--- Foreground color for progressbar showing the single core CPU usage.
+local fg_core = "#dc322f"
+
 -- Caches for values form previous iterations.
 local total_prev = { }
 local idle_prev = { }
@@ -43,12 +52,17 @@ local function init_prev_vars(coresnum)
   end
 end
 
-local function create_progressbar()
+local function create_progressbar(idx)
+  -- Widget with idx=1 shows total CPU usage.
+  local bg = idx == 1 and bg_total or bg_core
+  local fg = idx == 1 and fg_total or fg_core
+  local height = idx == 1 and 4 or 2
+
   return wibox.widget {
     max_value = 100,
-    forced_height = 2,
-    background_color = "#859900ff",
-    color = "#dc322fff",
+    forced_height = height,
+    background_color = bg,
+    color = fg,
     widget = wibox.widget.progressbar
   }
 end
@@ -69,7 +83,8 @@ local function wrap_final_widget(w)
   }
 end
 
---- Parse a single CPU-stat line form /proc/stats into 10 numbers.
+--- Parse a single CPU-stat line form /proc/stat into 10 numbers.
+-- @param str Single line from the /proc/stat.
 -- @return user
 -- @return nice
 -- @return system
@@ -81,10 +96,17 @@ end
 -- @return guest
 -- @return guest_nice
 local function parse_cpustat_line(str)
-  local cpuload_pattern = 'cpu%d+%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)'
+  local cpuload_pattern = 'cpu%d*%s*(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)'
   return str:match(cpuload_pattern)
 end
 
+--- Compute CPU usage percentage relative to the given previous values.
+-- @param str Single line from the /proc/stat.
+-- @param idle_prev Previous value of idle.
+-- @param total_prev Previous value of total.
+-- @return usage Usage percentage.
+-- @return total New total.
+-- @return idle New idle.
 local function compute_usage(str, idle_prev, total_prev)
   local user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice = parse_cpustat_line(str)
 
@@ -103,13 +125,13 @@ end
 
 -- Initialize the current CPU.
 local coresnum = detect_corenum()
-init_prev_vars(coresnum)
+init_prev_vars(coresnum + 1)
 
 -- Create progressbar widget for each CPU core and wrap them in layout.
 local pbars = { }
 local wrapped_pbars = { }
-for i = 1, coresnum do
-  local pbar = create_progressbar()
+for i = 1, coresnum + 1 do
+  local pbar = create_progressbar(i)
   pbars[i] = pbar
   wrapped_pbars[i] = wrap_progressbar(pbar)
 end
@@ -123,7 +145,7 @@ end
 -- Wrap them all in one more layout.
 local cpuload_widget = wrap_final_widget(l)
 
-local stats_cmd = [[sh -c "cat /proc/stat | egrep '^cpu[0-9]+'"]]
+local stats_cmd = [[sh -c "cat /proc/stat | egrep '^cpu'"]]
 watch(
   stats_cmd,
   1,
