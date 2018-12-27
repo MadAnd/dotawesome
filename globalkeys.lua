@@ -42,11 +42,15 @@ globalkeys = gtable.join(
     end,
     {description = "go back", group = "client"}),
 
-  -- Standard program
+  -- Programs
+  awful.key({ modkey,           }, "c", function () awful.spawn(terminal .. "-e twitch-curses") end,
+    {description = "open a process monitor", group = "launcher"}),
   awful.key({ modkey,           }, "t", function () awful.spawn(terminal .. "-e htop") end,
     {description = "open a process monitor", group = "launcher"}),
   awful.key({ modkey,           }, "Return", function () awful.spawn(terminal) end,
     {description = "open a terminal", group = "launcher"}),
+
+  -- AwesomeWM controls
   awful.key({ modkey, "Control" }, "r", awesome.restart,
     {description = "reload awesome", group = "awesome"}),
   awful.key({ modkey, "Shift"   }, "q", awesome.quit,

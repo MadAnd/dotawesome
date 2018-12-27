@@ -257,7 +257,7 @@ root.keys(
     awful.key({ modkey,           }, "s",      hotkeys_popup.show_help,
       {description="show help", group="awesome"}),
     -- Menubar
-    awful.key({ modkey }, "p", function() menubar.show() end,
+    awful.key({ modkey }, "r", function() menubar.show() end,
       {description = "show the menubar", group = "launcher"}),
     -- Switch keyboard layout: Mod4 + l (qwerty) or Mod4 + n (dvorak).
     awful.key({ modkey }, "#46", function () kbdlayout.switch() end,
@@ -357,7 +357,8 @@ screen.connect_signal("arrange", function (s)
     return
   end
 
-  local max = s.selected_tag.layout.name == "max"
+  local layout = s.selected_tag.layout.name
+  local max = (layout == "max" or layout == "fullscreen")
   -- use tiled_clients so that other floating windows don't affect the count
   -- but iterate over clients instead of tiled_clients as tiled_clients doesn't include maximized windows
   local only_one = #s.tiled_clients == 1
