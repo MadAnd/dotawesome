@@ -118,7 +118,8 @@ local function trim(s)
   return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
-local mycputemp_cmd = "bash -c \"sensors | grep temp1 | awk '{ print substr($2, 2, 2) substr($2, 6, 2) }'\""
+local mycputemp_cmd = [[bash -c "cat /sys/class/hwmon/hwmon0/temp1_input |
+    awk '{ print substr($1, 1, 2) \"°C\"; }'"]]
 local cputemp_callback = function (widget, stdout, stderr, exitreason, exitcode)
   widget:set_text(trim(stdout))
 end
