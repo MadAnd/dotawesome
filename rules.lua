@@ -33,6 +33,11 @@ awful.rules.rules = {
       role = { "Msgcompose" }
   }, properties = { floating = false }},
 
+  -- Fullscreen games.
+  { rule_any = {
+      class = { "openxcom", "openttd" }
+  }, properties = { fullscreen = true }},
+
   -- Floating clients.
   { rule_any = {
       instance = {
