@@ -10,12 +10,14 @@
 
 local watch = require("awful.widget.watch")
 local wibox = require("wibox")
-local naughty = require("naughty")
+local beautiful = require("beautiful")
 
+local height_total = 4
 --- Background color for progressbar showing the total CPU usage.
 local bg_total = "#6c71c4"
 --- Foreground color for progressbar showing the total CPU usage.
 local fg_total = "#cb4b16"
+local height_core = 2
 --- Background color for progressbar showing the single core CPU usage.
 local bg_core = "#859900"
 --- Foreground color for progressbar showing the single core CPU usage.
@@ -56,7 +58,7 @@ local function create_progressbar(idx)
   -- Widget with idx=1 shows the total CPU usage.
   local bg = idx == 1 and bg_total or bg_core
   local fg = idx == 1 and fg_total or fg_core
-  local height = idx == 1 and 4 or 2
+  local height = idx == 1 and height_total or height_core
 
   return wibox.widget {
     max_value = 100,
@@ -71,7 +73,7 @@ local function wrap_progressbar(w)
   return wibox.widget {
     w,
     layout = wibox.container.margin,
-    margins = 1,
+    bottom = 1,
   }
 end
 
@@ -146,7 +148,7 @@ end
 local cpuload_widget = wrap_final_widget(l)
 
 local stats_cmd = [[sh -c "cat /proc/stat | egrep '^cpu'"]]
-local update_interval = 1
+local update_interval = 2
 watch(
   stats_cmd,
   update_interval,
@@ -160,7 +162,6 @@ watch(
       idle_prev[i] = idle
       total_prev[i] = total
 
-      -- naughty.notify { text = tostring(i) }
       i = i + 1
     end
   end,
