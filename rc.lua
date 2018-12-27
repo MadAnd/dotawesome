@@ -16,20 +16,6 @@ local menubar = require("menubar")
 -- Standard widgets
 local hotkeys_popup = require("awful.hotkeys_popup").widget
 
--- Split-out config parts
--- Default modkey. Define it before requiring external hotkey files!
-modkey = "Mod4"
-require("rules")
-local globalkeys = require("globalkeys")
-local taglistcfg = require("taglistcfg")
-local tasklistcfg = require("tasklistcfg")
-
--- Private libs. Non-local to be accessible via awesome-client!
-multimedia = require("multimedia")
-kbdlayout = require("kbdlayout")
-volume_control = require("volume-control")
-cpuload = require("cpuload")
-
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
 -- another config (This code will only ever execute for the fallback config)
@@ -55,15 +41,29 @@ do
 end
 -- }}}
 
+-- Load custom theme
+beautiful.init(gfs.get_configuration_dir() .. "/theme.lua")
+
+-- Split-out config parts
+-- Default modkey. Define it before requiring external hotkey files!
+modkey = "Mod4"
+require("rules")
+local globalkeys = require("globalkeys")
+local taglistcfg = require("taglistcfg")
+local tasklistcfg = require("tasklistcfg")
+
+-- Private libs. Non-local to be accessible via awesome-client.
+multimedia = require("multimedia")
+kbdlayout = require("kbdlayout")
+volume_control = require("volume-control")
+cpuload = require("cpuload")
+
 -- {{{ Variable definitions
 
 -- This is used later as the default terminal and editor to run.
 terminal = "urxvt "
 editor = os.getenv("EDITOR") or "emacsclient -c"
 editor_cmd = terminal .. " -e " .. editor
-
--- Load custom theme
-beautiful.init(gfs.get_configuration_dir() .. "/theme.lua")
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 awful.layout.layouts = {
@@ -338,6 +338,7 @@ client.connect_signal(
     end
 end)
 
+-- Border styling for the focused client.
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 

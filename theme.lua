@@ -78,6 +78,7 @@ theme.menu_width  = "100"
 
 -- {{{ Icons
 -- {{{ Taglist
+theme.taglist_font = theme.font_small
 theme.taglist_bg_focus = theme.colors.green
 theme.taglist_bg_occupied = theme.colors.blue
 theme.taglist_fg_occupied = theme.colors.base3
@@ -89,6 +90,7 @@ theme.taglist_bg_empty = theme.colors.base2
 -- }}}
 
 -- Tasklist
+theme.tasklist_font = theme.font_small
 theme.tasklist_bg_normal = theme.colors.base2
 theme.tasklist_spacing = 2
 
