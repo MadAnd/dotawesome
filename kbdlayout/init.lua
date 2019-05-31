@@ -15,7 +15,8 @@ local naughty = require("naughty")
 --- Keyboard layout switcher with (optional) wibox indicator.
 local kbdlayout = { mt = {} }
 
-local client_layout = {}
+local client_layouts = {}
+setmetatable(client_layouts, { __mode = 'k' })
 local widgets = {}
 local current_layout
 local current_client
@@ -61,13 +62,13 @@ end
 -- Signal handlers for maintaining per-client keyboard layout
 
 local function on_focus(c)
-  current_client = c.window
+  current_client = c
 
-  if client_layout[current_client] == nil then
-    client_layout[current_client] = kbdlayout.default_layout_index
+  if client_layouts[current_client] == nil then
+    client_layouts[current_client] = kbdlayout.default_layout_index
   end
 
-  kbdlayout.switch(client_layout[current_client])
+  kbdlayout.switch(client_layouts[current_client])
 end
 
 local function on_unfocus()
@@ -75,7 +76,7 @@ local function on_unfocus()
 end
 
 local function on_unmanage(c)
-  client_layout[c.window] = nil
+  client_layouts[c] = nil
 end
 
 local function attach_client_signal_handlers()
@@ -148,7 +149,7 @@ function kbdlayout.switch(layout)
   current_layout = new_layout
 
   if current_client then
-    client_layout[current_client] = current_layout
+    client_layouts[current_client] = current_layout
   end
 
   local layoutCfg = kbdlayout.layouts[current_layout]
